@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\SuperMarketApi.csproj": {}
+    "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\SuperMarketApi.csproj": {}
   },
   "projects": {
-    "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\SuperMarketApi.csproj": {
+    "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\SuperMarketApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\SuperMarketApi.csproj",
+        "projectUniqueName": "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\SuperMarketApi.csproj",
         "projectName": "SuperMarketApi",
-        "projectPath": "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\SuperMarketApi.csproj",
+        "projectPath": "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\SuperMarketApi.csproj",
         "packagesPath": "C:\\Users\\FBCAKES\\.nuget\\packages\\",
-        "outputPath": "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\obj\\",
+        "outputPath": "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -99,7 +99,7 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
         }
       }
     }

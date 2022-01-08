@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3BlFXbrkJFe6p+p8vmkcqHteNkrm6dny+ZUTwRG0aj+r/8kT9Bnfu7ILfRPNdSLL+hWl8IN/bPy5ZVwQVYEwrA==",
+  "dgSpecHash": "MJPgFomuF+S3YWbEds4YJDsFxHZPThxzWzvWyl5H+QfEKCdjxL4bvI1V4qYgxa4CjZRmVeajh3CT23L+eLav5g==",
   "success": true,
-  "projectFilePath": "C:\\Temp\\SuperMarketApi\\SuperMarketApi\\SuperMarketApi.csproj",
+  "projectFilePath": "D:\\Biz1Markt\\Queen\\Biz1Market_API_Queen\\SuperMarketApi\\SuperMarketApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\FBCAKES\\.nuget\\packages\\entityframework\\6.4.4\\entityframework.6.4.4.nupkg.sha512",
     "C:\\Users\\FBCAKES\\.nuget\\packages\\microsoft.aspnet.cors\\5.2.7\\microsoft.aspnet.cors.5.2.7.nupkg.sha512",

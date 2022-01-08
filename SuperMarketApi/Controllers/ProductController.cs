@@ -413,69 +413,7 @@ namespace SuperMarketApi.Controllers
             }
             return true;
         }
-        [HttpGet("getTaxgroup")]
-        public IActionResult getTaxgroup(int CompanyId)
-        {
-            var taxgroups = db.TaxGroups.Where(x => x.CompanyId == CompanyId).ToList();
-
-            return Ok(taxgroups);
-        }
-
-        [HttpPost("addtaxgroup")]
-        public IActionResult addtaxgroup([FromBody]dynamic taxGroupobj)
-        {
-            try
-            {
-                TaxGroup taxGroup = taxGroupobj.ToObject<TaxGroup>();
-                db.TaxGroups.Add(taxGroup);
-                db.SaveChanges();
-                var response = new
-                {
-                    status = 200,
-                    msg = "TaxGroup added successfully",
-                    taxgroup = taxGroup
-                };
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new
-                {
-                    status = 0,
-                    msg = "Something went wrong",
-                    error = new Exception(ex.Message, ex.InnerException)
-                };
-                return Ok(response);
-            }
-        }
-        [HttpPost("updatetaxgroup")]
-        public IActionResult updatetaxgroup([FromBody]dynamic taxGroupobj)
-        {
-            try
-            {
-                TaxGroup taxGroup = taxGroupobj.ToObject<TaxGroup>();
-                db.Entry(taxGroup).State = EntityState.Modified;
-                db.SaveChanges();
-                var response = new
-                {
-                    status = 200,
-                    msg = "Taxgroup updated successfully",
-                    taxgroup = taxGroup
-                };
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new
-                {
-                    status = 0,
-                    msg = "Something went wrong",
-                    error = new Exception(ex.Message, ex.InnerException)
-                };
-                return Ok(response);
-            }
-        }
-
+        
         [HttpGet("getUnits")]
         public IActionResult getUnits(int CompanyId)
         {
