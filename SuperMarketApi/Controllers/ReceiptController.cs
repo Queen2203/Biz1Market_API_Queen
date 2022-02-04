@@ -22,9 +22,9 @@ namespace SuperMarketApi.Controllers
             Configuration = configuration;
         }
 
-        //Get_Receipt_Data
-        [HttpGet("GetReceipt")]
-        public IActionResult GetReceipt(int Storeid, DateTime fromdate, DateTime todate, string InvoiceNo)
+
+        [HttpGet("Gettestdata")]
+        public IActionResult Gettestdata(int Storeid, DateTime? fromdate, DateTime? todate)
         {
             try
             {
@@ -33,18 +33,16 @@ namespace SuperMarketApi.Controllers
 
                 SqlCommand cmd = new SqlCommand("dbo.Receipt", sqlCon);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@StoreID", Storeid));
+                //cmd.Parameters.Add(new SqlParameter("@ordereddate", Orderedate));
+                cmd.Parameters.Add(new SqlParameter("@storeId", Storeid));
                 cmd.Parameters.Add(new SqlParameter("@fromDate", fromdate));
                 cmd.Parameters.Add(new SqlParameter("@todate", todate));
-                cmd.Parameters.Add(new SqlParameter("@invoice", InvoiceNo));
-
                 DataSet ds = new DataSet();
                 SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
                 sqlAdp.Fill(ds);
                 var data = new
                 {
-                    status = 200,
-                    receipts = ds.Tables[0]
+                    receipts = ds.Tables[0],
                 };
                 sqlCon.Close();
                 return Ok(data);
@@ -54,18 +52,16 @@ namespace SuperMarketApi.Controllers
                 var error = new
                 {
                     error = new Exception(e.Message, e.InnerException),
-                    status = 500,
+                    status = 0,
                     msg = "Something went wrong  Contact our service provider"
                 };
                 return Json(error);
             }
-        
+
         }
 
-        //Receipt_Transaction
-
-        [HttpGet("GetTransByOrderId")]
-        public ActionResult Receipt_Transaction(int OrderId)
+        [HttpGet("getByOrderId")]
+        public ActionResult getByOrderId(int OrderId)
         {
             try
             {
@@ -88,7 +84,6 @@ namespace SuperMarketApi.Controllers
                 return Json(error);
             }
         }
-
         // GET: ReceiptController
         public ActionResult Index()
         {
@@ -106,7 +101,22 @@ namespace SuperMarketApi.Controllers
         {
             return View();
         }
-                
+
+        // POST: ReceiptController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(IFormCollection collection)
+        {
+            try
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
         // GET: ReceiptController/Edit/5
         public ActionResult Edit(int id)
         {
