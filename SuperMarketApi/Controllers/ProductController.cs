@@ -42,9 +42,9 @@ namespace SuperMarketApi.Controllers
             barcode.ProductId = productid;
             db.Barcodes.Add(barcode);
             db.SaveChanges();
-            foreach(var vg in variantgroups)
+            foreach (var vg in variantgroups)
             {
-                foreach(var v in db.Variants.Where(x => x.VariantGroupId == vg.Id).ToList())
+                foreach (var v in db.Variants.Where(x => x.VariantGroupId == vg.Id).ToList())
                 {
                     BarcodeVariant barcodeVariant = new BarcodeVariant();
                     barcodeVariant.BarcodeId = barcode.Id;
@@ -59,58 +59,58 @@ namespace SuperMarketApi.Controllers
 
         // Add Products
         [HttpGet("addData")]
-           public IActionResult addData([FromBody] Product data)
+        public IActionResult addData([FromBody] Product data)
+        {
+            try
             {
-                try
+                db.Products.Add(data);
+                db.SaveChanges();
+                Product product = db.Products.Find(data.Id);
+                var variantgroups = db.CategoryVariantGroups.Where(x => x.CategoryId == product.CategoryId).ToList();
+                Barcode barcode = new Barcode();
+                barcode.ProductId = data.Id;
+                db.Barcodes.Add(barcode);
+                db.SaveChanges();
+                foreach (var vg in variantgroups)
                 {
-                    db.Products.Add(data);
-                    db.SaveChanges();
-                    Product product = db.Products.Find(data.Id);
-                    var variantgroups = db.CategoryVariantGroups.Where(x => x.CategoryId == product.CategoryId).ToList();
-                    Barcode barcode = new Barcode();
-                    barcode.ProductId = data.Id;
-                    db.Barcodes.Add(barcode);
-                    db.SaveChanges();
-                    foreach (var vg in variantgroups)
+                    foreach (var v in db.Variants.Where(x => x.VariantGroupId == vg.Id).ToList())
                     {
-                        foreach (var v in db.Variants.Where(x => x.VariantGroupId == vg.Id).ToList())
-                        {
-                            BarcodeVariant barcodeVariant = new BarcodeVariant();
-                            barcodeVariant.BarcodeId = barcode.Id;
-                            barcodeVariant.VariantId = v.Id;
-                            db.BarcodeVariants.Add(barcodeVariant);
-                            db.SaveChanges();
-                        }
+                        BarcodeVariant barcodeVariant = new BarcodeVariant();
+                        barcodeVariant.BarcodeId = barcode.Id;
+                        barcodeVariant.VariantId = v.Id;
+                        db.BarcodeVariants.Add(barcodeVariant);
+                        db.SaveChanges();
                     }
-                    int compId = product.CompanyId;
-                    int productId = product.Id;
-                    SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
-                    sqlCon.Open();
-                    SqlCommand cmd = new SqlCommand("dbo.StoreProduct", sqlCon);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@CompanyId", compId));
-                    cmd.Parameters.Add(new SqlParameter("@productId", productId));
-                    int success = cmd.ExecuteNonQuery();
-                    sqlCon.Close();
+                }
+                int compId = product.CompanyId;
+                int productId = product.Id;
+                SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
+                sqlCon.Open();
+                SqlCommand cmd = new SqlCommand("dbo.StoreProduct", sqlCon);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CompanyId", compId));
+                cmd.Parameters.Add(new SqlParameter("@productId", productId));
+                int success = cmd.ExecuteNonQuery();
+                sqlCon.Close();
 
                 var response = new
-                    {
-                        status = 200,
-                        message = "Value Added Successfull"
-                    };
-                    return Ok(response);
-          
-                }
-                catch (Exception)
                 {
-                    throw;
-                }
-           }
+                    status = 200,
+                    message = "Value Added Successfull"
+                };
+                return Ok(response);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
         // View Products
         [HttpGet("getProduct")]
-        public IActionResult getProduct(int CompanyId,int StoreId)
+        public IActionResult getProduct(int CompanyId, int StoreId)
         {
             SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
             sqlCon.Open();
@@ -132,7 +132,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("addProduct")]
-        public IActionResult addProduct([FromBody]dynamic data,int userid, int storeid)
+        public IActionResult addProduct([FromBody] dynamic data, int userid, int storeid)
         {
             try
             {
@@ -165,7 +165,7 @@ namespace SuperMarketApi.Controllers
                 DataRow table = ds.Tables[0].Rows[0];
                 productid = (int)table["ProductId"];
                 sqlCon.Close();
-                if(data.variantcombinations.Count > 0)
+                if (data.variantcombinations.Count > 0)
                 {
                     foreach (dynamic cmb in data.variantcombinations)
                     {
@@ -176,7 +176,7 @@ namespace SuperMarketApi.Controllers
                         db.Barcodes.Add(barcode);
                         db.SaveChanges();
                         List<Store> stores = db.Stores.Where(x => x.CompanyId == product.CompanyId).ToList();
-                        foreach(Store store in stores)
+                        foreach (Store store in stores)
                         {
                             Stock stock = new Stock();
                             stock.BarcodeId = barcode.Id;
@@ -283,7 +283,7 @@ namespace SuperMarketApi.Controllers
                 Product oldproduct = db.Products.AsNoTracking().Where(x => x.Id == product.Id).FirstOrDefault();
                 db.Entry(product).State = EntityState.Modified;
                 db.SaveChanges();
-                if(oldproduct.CategoryId != product.CategoryId)
+                if (oldproduct.CategoryId != product.CategoryId)
                 {
                     productcategorychange(product.Id, data.variantcombinations);
                 }
@@ -310,12 +310,72 @@ namespace SuperMarketApi.Controllers
             }
 
         }
+        [HttpGet("GetById")]
+        public IActionResult GetById(int id, int compId)
+        {
+            try
+            {
+                var prod = new
+                {
+                    products = db.Products.Where(x => x.CompanyId == compId).ToList(),
+                    product = from p in db.Products
+                              where p.Id == id && p.CompanyId == compId
+                              select new { p.Id, Product = p.Name, p.Description, p.Price, p.TakeawayPrice, p.DeliveryPrice, p.CategoryId, p.TaxGroupId, p.CompanyId, p.UnitId, p.ProductTypeId, p.KOTGroupId, p.ImgUrl, p.ProductCode, p.UPPrice, p.Recomended, p.SortOrder, p.isactive, p.minquantity, p.minblock },
+
+                };
+                return Json(prod);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+        }
+
+        [HttpGet("UpdateAct")]
+        public IActionResult UpdateAct(int Id, bool active)
+        {
+            try
+            {
+                var product = db.Products.Find(Id);
+                product.isactive = active;
+                db.Entry(product).State = EntityState.Modified;
+                db.SaveChanges();
+                var error = new
+                {
+                    status = "success",
+                    data = new
+                    {
+                        value = 2
+                    },
+                    msg = "The data updated successfully"
+                };
+
+                return Json(error);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+
+        }
         public bool barcodedetailsupdate(int productid, dynamic variantcombinations)
         {
             List<int> bcids = new List<int>();
             foreach (dynamic cmb in variantcombinations)
             {
-                if(cmb.id > 0)
+                if (cmb.id > 0)
                 {
                     int barcodeid = (int)cmb.id;
                     Barcode barcode = db.Barcodes.Find(barcodeid);
@@ -324,7 +384,7 @@ namespace SuperMarketApi.Controllers
                     db.SaveChanges();
                     bcids.Add(barcode.Id);
                 }
-                else if(cmb.id == 0)
+                else if (cmb.id == 0)
                 {
                     Barcode barcode = new Barcode();
                     barcode.BarCode = cmb.barcode;
@@ -359,13 +419,13 @@ namespace SuperMarketApi.Controllers
         public bool productcategorychange(int productid, dynamic variantcombinations)
         {
             List<Barcode> barcodes = db.Barcodes.Where(x => x.ProductId == productid).ToList();
-            foreach(Barcode barcode in barcodes)
+            foreach (Barcode barcode in barcodes)
             {
                 BarcodeVariant[] barcodeVariants = db.BarcodeVariants.Where(x => x.BarcodeId == barcode.Id).ToArray();
                 db.BarcodeVariants.RemoveRange(barcodeVariants);
                 db.SaveChanges();
             }
-            for(int i=0; i<variantcombinations.Count; i++)
+            for (int i = 0; i < variantcombinations.Count; i++)
             {
                 Barcode barcode = new Barcode();
                 if (barcodes[i] != null)
@@ -413,7 +473,7 @@ namespace SuperMarketApi.Controllers
             }
             return true;
         }
-        
+
         [HttpGet("getUnits")]
         public IActionResult getUnits(int CompanyId)
         {
@@ -429,7 +489,7 @@ namespace SuperMarketApi.Controllers
 
             return Ok(units);
         }
-      
+
 
         [HttpGet("getProductType")]
         public IActionResult getProductType(int CompanyId)
@@ -514,7 +574,7 @@ namespace SuperMarketApi.Controllers
 
             return Ok(categories);
         }
-        
+
         [HttpGet("getvariants")]
         public IActionResult getvariants(int CompanyId)
         {
@@ -534,7 +594,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("addvariant")]
-        public IActionResult addvariant([FromBody]Variant variant)
+        public IActionResult addvariant([FromBody] Variant variant)
         {
             try
             {
@@ -548,7 +608,7 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -561,7 +621,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("addvariantgroup")]
-        public IActionResult addvariantgroup([FromBody]VariantGroup variantGroup)
+        public IActionResult addvariantgroup([FromBody] VariantGroup variantGroup)
         {
             try
             {
@@ -575,7 +635,7 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -587,7 +647,7 @@ namespace SuperMarketApi.Controllers
             }
         }
         [HttpPost("updatevariant")]
-        public IActionResult updatevariant([FromBody]Variant variant)
+        public IActionResult updatevariant([FromBody] Variant variant)
         {
             try
             {
@@ -602,7 +662,7 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -615,7 +675,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("updatevariantgroup")]
-        public IActionResult updatevariantgroup([FromBody]VariantGroup variantGroup)
+        public IActionResult updatevariantgroup([FromBody] VariantGroup variantGroup)
         {
             try
             {
@@ -629,7 +689,7 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -642,7 +702,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("batchEntry")]
-        public IActionResult batchEntry([FromBody]dynamic batcheobj,int userid)
+        public IActionResult batchEntry([FromBody] dynamic batcheobj, int userid)
         {
             try
             {
@@ -674,7 +734,7 @@ namespace SuperMarketApi.Controllers
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
                         JObject product = new JObject();
-                        for (int j=0; j<row.ItemArray.Length; j++)
+                        for (int j = 0; j < row.ItemArray.Length; j++)
                         {
                             string column = ds.Tables[0].Columns[j].ToString();
                             column = Char.ToLowerInvariant(column[0]) + column.Substring(1);
@@ -736,7 +796,7 @@ namespace SuperMarketApi.Controllers
 
             SqlCommand cmd = new SqlCommand("dbo.BarcodeProduct", sqlCon);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.Add(new SqlParameter("@CompanyId",CompanyId));
+            cmd.Parameters.Add(new SqlParameter("@CompanyId", CompanyId));
             cmd.Parameters.Add(new SqlParameter("@storeId", storeid));
 
             DataSet ds = new DataSet();
@@ -744,11 +804,11 @@ namespace SuperMarketApi.Controllers
             sqlAdp.Fill(ds);
             int lastbatchno = 0;
             int lastorderno = 0;
-            if(db.Batches.Where(x => x.CompanyId == CompanyId).Any())
+            if (db.Batches.Where(x => x.CompanyId == CompanyId).Any())
             {
                 lastbatchno = db.Batches.Where(x => x.CompanyId == CompanyId).Max(x => x.BatchNo);
             }
-            if(db.Orders.Where(x => x.CompanyId == CompanyId).Any())
+            if (db.Orders.Where(x => x.CompanyId == CompanyId).Any())
             {
                 lastorderno = db.Orders.Where(x => x.CompanyId == CompanyId).Max(x => x.OrderNo);
             }
@@ -837,7 +897,7 @@ namespace SuperMarketApi.Controllers
             }
         }
         [HttpGet("getStockProduct")]
-        public IActionResult getStockProduct(int CompanyId,int StoreId)
+        public IActionResult getStockProduct(int CompanyId, int StoreId)
         {
             try
             {
@@ -872,7 +932,7 @@ namespace SuperMarketApi.Controllers
             }
         }
         [HttpPost("bulkaddproduct")]
-        public IActionResult bulkaddproduct([FromBody]List<Product> products)
+        public IActionResult bulkaddproduct([FromBody] List<Product> products)
         {
             try
             {
@@ -923,8 +983,8 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-           
-                 catch (Exception ex)
+
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -956,8 +1016,8 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-           
-                 catch (Exception ex)
+
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -989,8 +1049,8 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-           
-                 catch (Exception ex)
+
+            catch (Exception ex)
             {
                 var response = new
                 {
@@ -1021,8 +1081,8 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
-           
-                 catch (Exception ex)
+
+            catch (Exception ex)
             {
                 var response = new
                 {

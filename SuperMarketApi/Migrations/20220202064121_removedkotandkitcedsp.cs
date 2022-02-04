@@ -4,9 +4,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SuperMarketApi.Migrations
 {
-    public partial class removeorderitemkotidandkitchenids : Migration
+    public partial class removedkotandkitcedsp : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_OrderItems_KOT_KOTId",
+                table: "OrderItems");
+
+            migrationBuilder.DropTable(
+                name: "KOT");
+
+            migrationBuilder.DropIndex(
+                name: "IX_OrderItems_KOTId",
+                table: "OrderItems");
+
+            migrationBuilder.DropColumn(
+                name: "KOTId",
+                table: "OrderItems");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
                 name: "KOTId",
@@ -19,16 +37,16 @@ namespace SuperMarketApi.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    KOTStatusId = table.Column<int>(nullable: false),
-                    Instruction = table.Column<string>(nullable: true),
-                    KOTNo = table.Column<string>(nullable: true),
-                    Updated = table.Column<bool>(nullable: false),
-                    OrderId = table.Column<int>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    ModifiedDate = table.Column<DateTime>(nullable: false),
                     CompanyId = table.Column<int>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    Instruction = table.Column<string>(nullable: true),
+                    KOTGroupId = table.Column<int>(nullable: true),
+                    KOTNo = table.Column<string>(nullable: true),
+                    KOTStatusId = table.Column<int>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: false),
+                    OrderId = table.Column<int>(nullable: false),
                     StoreId = table.Column<int>(nullable: true),
-                    KOTGroupId = table.Column<int>(nullable: true)
+                    Updated = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,7 +55,8 @@ namespace SuperMarketApi.Migrations
                         name: "FK_KOT_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_KOT_KOTGroups_KOTGroupId",
                         column: x => x.KOTGroupId,
@@ -48,7 +67,8 @@ namespace SuperMarketApi.Migrations
                         name: "FK_KOT_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_KOT_Stores_StoreId",
                         column: x => x.StoreId,
@@ -89,24 +109,6 @@ namespace SuperMarketApi.Migrations
                 principalTable: "KOT",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderItems_KOT_KOTId",
-                table: "OrderItems");
-
-            migrationBuilder.DropTable(
-                name: "KOT");
-
-            migrationBuilder.DropIndex(
-                name: "IX_OrderItems_KOTId",
-                table: "OrderItems");
-
-            migrationBuilder.DropColumn(
-                name: "KOTId",
-                table: "OrderItems");
         }
     }
 }

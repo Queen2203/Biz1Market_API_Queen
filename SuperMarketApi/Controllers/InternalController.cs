@@ -10,6 +10,7 @@ using System.Data;
 using System.Collections.Generic;
 using SuperMarketApi.Models.Enum;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 /*using System.Linq;*/
 namespace SuperMarketApi.Controllers
 {
@@ -26,17 +27,29 @@ namespace SuperMarketApi.Controllers
             db = contextOptions;
             Configuration = configuration;
         }
-        [HttpGet("getStoreList")]                            
+        [HttpGet("getStoreList")]
         public IActionResult getStoreList(int CompanyId)
         {
             var response = new
             {
                 StoreList = db.Stores.Where(x => x.CompanyId == CompanyId).ToList(),
                 CusList = db.Contacts.Where(c => c.CompanyId == CompanyId).ToList(),
-               BankAcct = db.BankAccounts.Where(b => b.CompanyId == CompanyId).ToList()
+                BankAcct = db.BankAccounts.Where(b => b.CompanyId == CompanyId).ToList()
             };
             return Json(response);
         }
+
+        //Queen 31-01-2022
+        [HttpGet("GetstorebyId")]
+        public IActionResult GetstorebyId(int CompanyId, int Id)
+        {
+            var response = new
+            {
+                StoreList = db.Stores.Where(x => x.CompanyId == CompanyId && (x.Id == Id || Id == 0)).ToList(),
+            };
+            return Json(response);
+        }
+
 
 
         [HttpGet("getContactData")]
@@ -45,7 +58,7 @@ namespace SuperMarketApi.Controllers
             var response =
 
                  db.Contacts.Where(x => x.CompanyId == CompanyId).ToList();
-            
+
             return Json(response);
         }
 
@@ -78,9 +91,9 @@ namespace SuperMarketApi.Controllers
                 var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj);
                 SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
                 sqlCon.Open();
-                SqlCommand cmd = new SqlCommand("dbo.saveInternal", sqlCon);
+                SqlCommand cmd = new SqlCommand("dbo.saveinternal", sqlCon);
                 cmd.CommandType = CommandType.StoredProcedure;
-               cmd.Parameters.Add(new SqlParameter("@orderJson", jsonString));
+                cmd.Parameters.Add(new SqlParameter("@orderJson", jsonString));
                 cmd.Parameters.Add(new SqlParameter("@companyid", companyId));
                 cmd.Parameters.Add(new SqlParameter("@orderId", orderId));
                 cmd.Parameters.Add(new SqlParameter("@ordItemId", ordItemId));
@@ -96,8 +109,9 @@ namespace SuperMarketApi.Controllers
                 return Ok(response);
             }
             catch (Exception ex)
-            {          var response = new
-                {   
+            {
+                var response = new
+                {
                     status = 0,
                     msg = "Something Went Wrong",
                     error = new Exception(ex.Message, ex.InnerException)
@@ -139,7 +153,7 @@ namespace SuperMarketApi.Controllers
                     orderProd.CompanyId = companyId;
                     db.OrderItems.Add(orderProd);
                     db.SaveChanges();
-                    OrderItemDetail ordProdDetail = new OrderItemDetail(orderProd.Id, null, (int)SuperMarketApi.Models.Enum.OrderItemType.Order, quantity, 0, 0, 0, 0, DateTime.Now,db);
+                    OrderItemDetail ordProdDetail = new OrderItemDetail(orderProd.Id, null, (int)SuperMarketApi.Models.Enum.OrderItemType.Order, quantity, 0, 0, 0, 0, DateTime.Now, db);
                     ordProdDetail.UnitPrice = price;
                     ordProdDetail.Tax1 = tax1;
                     ordProdDetail.Tax2 = tax2;
@@ -172,65 +186,144 @@ namespace SuperMarketApi.Controllers
             }
         }
 
-        [HttpPost("getOrderList")]
-        public IActionResult getOrderList([FromBody] dynamic objData)
+        //[httppost("getorderlist")]
+        //public iactionresult getorderlist([frombody] dynamic objdata)
+        //{
+        //    dynamic jsonobj = objdata;
+        //    int companyid = jsonobj[0].companyid;
+        //    int? searchid = jsonobj[0].searchid;
+        //    //int? searchstoreid = jsonobj[0].searchstoreid;
+        //    datetime? datefrom = jsonobj[0].datefrom;
+        //    datetime? dateto = datetime.now;
+        //    //int? orderstatus = jsonobj[0].orderstatus;
+        //    //int? dispatchstatus = jsonobj[0].dispatchstatus;
+        //    //string wipstatus = jsonobj[0].wipstatus;
+        //    //string prodstatus = jsonobj[0].prodstatus;
+        //    string numrecords = jsonobj[0].numrecordsstr;
+        //    //string specialorder = jsonobj[0].specialorder;
+        //    //string productdesc = jsonobj[0].productdesc;
+        //    //int? cancelstatus = jsonobj[0].cancelstatus;
+        //    //int? receivestatus = jsonobj[0].receivestatus;
+        //    //int? productid = jsonobj[0].productid;
+        //    //int? billid = jsonobj[0].billid;
+        //    //int? searchdispatchsts = jsonobj[0].searchdispatchsts;
+        //    //string userid = jsonobj[0].userid;
+        //    //int? storeid = jsonobj[0].storeid;
+        //    //string ordertype = jsonobj[0].ordertype;
+
+        //    sqlconnection sqlcon = new sqlconnection(configuration.getconnectionstring("myconn"));
+        //    sqlcon.open();
+
+        //    sqlcommand cmd = new sqlcommand("dbo.internal", sqlcon);
+        //    cmd.commandtype = commandtype.storedprocedure;
+        //    //cmd.parameters.add(new sqlparameter("@orderstatus", orderstatus));
+        //    //cmd.parameters.add(new sqlparameter("@dispatchstatus", dispatchstatus));
+        //    cmd.parameters.add(new sqlparameter("@searchid", searchid));
+        //    //cmd.parameters.add(new sqlparameter("@searchstoreid", searchstoreid));
+        //    cmd.parameters.add(new sqlparameter("@fromdate", datefrom));
+        //    cmd.parameters.add(new sqlparameter("@todate", dateto));
+        //    cmd.parameters.add(new sqlparameter("@numrecords", numrecords));
+        //    //cmd.parameters.add(new sqlparameter("@sessionstoreid", 0));
+        //    //cmd.parameters.add(new sqlparameter("@userid", userid));
+        //    //cmd.parameters.add(new sqlparameter("@ordertype", ordertype));
+        //    //cmd.parameters.add(new sqlparameter("@cancelstatus", cancelstatus));
+        //    //cmd.parameters.add(new sqlparameter("@receivestatus", receivestatus));
+        //    //cmd.parameters.add(new sqlparameter("@productid", productid));
+        //    //cmd.parameters.add(new sqlparameter("@billid", billid));
+        //    //cmd.parameters.add(new sqlparameter("@specialorder", specialorder));
+        //    //cmd.parameters.add(new sqlparameter("@wipstatus", wipstatus));
+        //    //cmd.parameters.add(new sqlparameter("@prodstatus", prodstatus));
+        //    //cmd.parameters.add(new sqlparameter("@searchdispatchsts", searchdispatchsts));
+        //    //cmd.parameters.add(new sqlparameter("@productdesc", productdesc));
+        //    cmd.parameters.add(new sqlparameter("@companyid", companyid));
+        //    dataset ds = new dataset();
+        //    sqldataadapter sqladp = new sqldataadapter(cmd);
+        //    sqladp.fill(ds);
+        //    var response = new
+        //    {
+        //        order = ds.tables[0]
+        //    };
+        //    return ok(response);
+
+        //}
+        //[HttpGet("getOrderList")]
+        //public IActionResult getOrderList(int companyId, int searchId, int numRecords = 25)
+        //{
+        //    try
+        //    {
+        //        SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
+        //        sqlCon.Open();
+
+        //        SqlCommand cmd = new SqlCommand("dbo.Internal", sqlCon);
+        //        cmd.CommandType = CommandType.StoredProcedure;
+        //        cmd.Parameters.Add(new SqlParameter("@searchId", searchId));
+        //        cmd.Parameters.Add(new SqlParameter("@companyId", companyId));
+        //        cmd.Parameters.Add(new SqlParameter("@numRecords", numRecords));
+        //        DataSet ds = new DataSet();
+        //        SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
+        //        sqlAdp.Fill(ds);
+        //        string Jstring = "";
+        //        for(int j = 0; j < ds.Tables[0].Rows.Count; j++)
+        //        {
+        //            Jstring += ds.Tables[0].Rows[j].ItemArray[0].ToString();
+        //        }
+        //        var data = new
+        //        {
+        //            status = 200,
+        //            Orders = JsonConvert.DeserializeObject(Jstring)
+        //        };
+        //        //sqlCon.Close();
+        //        return Json(data);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        var error = new
+        //        {
+        //            error = new Exception(e.Message, e.InnerException),
+        //            status = 500,
+        //            msg = "Something went wrong  Contact our service provider"
+        //        };
+        //        return Json(error);
+        //    }
+
+        //}
+        [HttpGet("getOrderList")]
+        public IActionResult getOrderList(int companyId, int? searchId, int numRecords = 25)
         {
-            dynamic jsonObj = objData;
-            int companyId = jsonObj[0].companyId;
-            int? searchId = jsonObj[0].searchId;
-            //int? searchStoreId = jsonObj[0].searchStoreId;
-            DateTime? dateFrom = jsonObj[0].dateFrom;
-            DateTime? dateTo = DateTime.Now;
-            //int? orderStatus = jsonObj[0].orderStatus;
-            //int? dispatchStatus = jsonObj[0].dispatchStatus;
-            //string wipStatus = jsonObj[0].wipStatus;
-            //string prodStatus = jsonObj[0].prodStatus;
-            string numRecords = jsonObj[0].numRecordsStr;
-            //string specialOrder = jsonObj[0].specialOrder;
-            //string productDesc = jsonObj[0].productDesc;
-            //int? cancelStatus = jsonObj[0].cancelStatus;
-            //int? receiveStatus = jsonObj[0].receiveStatus;
-            //int? productId = jsonObj[0].productId;
-            //int? billId = jsonObj[0].billId;
-            //int? searchDispatchSts = jsonObj[0].searchDispatchSts;
-            //string UserID = jsonObj[0].UserID;
-            //int? storeID = jsonObj[0].storeID;
-            //string orderType = jsonObj[0].orderType;
-
-            SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
-            sqlCon.Open();
-
-            SqlCommand cmd = new SqlCommand("dbo.Internal", sqlCon);
-            cmd.CommandType = CommandType.StoredProcedure;
-            //cmd.Parameters.Add(new SqlParameter("@orderStatus", orderStatus));
-            //cmd.Parameters.Add(new SqlParameter("@dispatchStatus", dispatchStatus));
-            cmd.Parameters.Add(new SqlParameter("@searchId", searchId));
-            //cmd.Parameters.Add(new SqlParameter("@searchStoreId", searchStoreId));
-            cmd.Parameters.Add(new SqlParameter("@fromDate", dateFrom));
-            cmd.Parameters.Add(new SqlParameter("@toDate", dateTo));
-            cmd.Parameters.Add(new SqlParameter("@numRecords", numRecords));
-            //cmd.Parameters.Add(new SqlParameter("@sessionStoreID", 0));
-            //cmd.Parameters.Add(new SqlParameter("@userId", UserID));
-            //cmd.Parameters.Add(new SqlParameter("@orderType", orderType));
-            //cmd.Parameters.Add(new SqlParameter("@cancelStatus", cancelStatus));
-            //cmd.Parameters.Add(new SqlParameter("@receiveStatus", receiveStatus));
-            //cmd.Parameters.Add(new SqlParameter("@productId", productId));
-            //cmd.Parameters.Add(new SqlParameter("@billId", billId));
-            //cmd.Parameters.Add(new SqlParameter("@specialOrder", specialOrder));
-            //cmd.Parameters.Add(new SqlParameter("@wipStatus", wipStatus));
-            //cmd.Parameters.Add(new SqlParameter("@prodStatus", prodStatus));
-            //cmd.Parameters.Add(new SqlParameter("@searchDispatchSts", searchDispatchSts));
-            //cmd.Parameters.Add(new SqlParameter("@productDesc", productDesc));
-            cmd.Parameters.Add(new SqlParameter("@companyId", companyId));
-            DataSet ds = new DataSet();
-            SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
-            sqlAdp.Fill(ds);
-            var response = new
+            try
             {
-                Order = ds.Tables[0]
-            };
-            return Ok(response);
+                SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
+                sqlCon.Open();
 
+                SqlCommand cmd = new SqlCommand("dbo.Internal", sqlCon);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@searchId", searchId));
+                cmd.Parameters.Add(new SqlParameter("@numRecords", numRecords));
+                cmd.Parameters.Add(new SqlParameter("@companyId", companyId));
+                DataSet ds = new DataSet();
+                SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
+                sqlAdp.Fill(ds);
+                string jString = "";
+                for (int j = 0; j < ds.Tables[0].Rows.Count; j++)
+                {
+                    jString += ds.Tables[0].Rows[j].ItemArray[0].ToString();
+                }
+                var response = new
+                {
+                    status = 200,
+                    Orders = JsonConvert.DeserializeObject(jString)
+                };
+                return Json(response);
+            }
+            catch (Exception e)
+            {
+                var response = new
+                {
+                    status = 500,
+                    error = new Exception(e.Message, e.InnerException)
+                };
+                return Json(response);
+            }
         }
 
         [HttpPost("getDispatchList")]
@@ -307,7 +400,7 @@ namespace SuperMarketApi.Controllers
                     dbContextTransaction.Commit();
                     var data = new
                     {
-                        data = " Data deleted Successfully",                                      
+                        data = " Data deleted Successfully",
                         status = 1
                     };
                     return Json(data);
@@ -322,7 +415,7 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpGet("Delete")]
-        public ActionResult Delete( int CompanyId, int ItemId)
+        public ActionResult Delete(int CompanyId, int ItemId)
         {
 
             OrderItem orderItem = null;
@@ -333,17 +426,17 @@ namespace SuperMarketApi.Controllers
             IEnumerable<OrderItemDetail> orderItemDetail = db.OrderItemDetails.Where(s => s.OrderItemId == ItemId && s.CompanyId == CompanyId);
             db.OrderItemDetails.RemoveRange(orderItemDetail);
             db.SaveChanges();
-            var data = new  
+            var data = new
             {
                 data = "OrderItem Deleted",
                 status = 1
             };
             return Json(data);
         }
-    
+
         [HttpGet("GetOrderedItems")]
-        public IActionResult GetOrderedItems(int CompanyId,int orderId)
-            {
+        public IActionResult GetOrderedItems(int CompanyId, int orderId)
+        {
             try
             {
                 //List<OrderItem> dispatchList =new List<OrderItem>();
@@ -395,8 +488,8 @@ namespace SuperMarketApi.Controllers
                     SuppliedBy = s.SuppliedBy.Name,
                     OrderedBy = s.OrderedBy.Name,
                     SuppliedById = s.SuppliedById,
-                    OrderedById =s.OrderedById,
-                    StoreId =s.StoreId
+                    OrderedById = s.OrderedById,
+                    StoreId = s.StoreId
                 });
                 var orderProd = db.OrderItems.Where(b => b.OrderId == orderId && b.CompanyId == CompanyId).Select(s => new {
                     s.Product.Description,
@@ -418,8 +511,8 @@ namespace SuperMarketApi.Controllers
                     s.ReceivedQuantity,
                     s.ContainerCount,
                     s.ContainerId,
-                    s.ContainerWeight  ,
-                    s.Updated ,
+                    s.ContainerWeight,
+                    s.Updated,
                     s.BarcodeId
                 }).ToList();
 
@@ -460,7 +553,9 @@ namespace SuperMarketApi.Controllers
                                   c.BillId
                               };
 
-                var data = new { order = order, 
+                var data = new
+                {
+                    order = order,
                     orderProd = orderProd,
                     OrderItem = OrdItem
                 };
@@ -475,7 +570,7 @@ namespace SuperMarketApi.Controllers
 
         }
         [HttpGet("getStockContainer")]
-        public IActionResult getStockContainer(int CompanyId,int StoreId)
+        public IActionResult getStockContainer(int CompanyId, int StoreId)
         {
             var stockContainer = db.StockContainer.Where(x => x.CompanyId == CompanyId && x.StoreId == StoreId).ToList();
 
@@ -483,8 +578,8 @@ namespace SuperMarketApi.Controllers
         }
         [HttpPost("OrdDispatch")]
         public ActionResult OrdDispatch([FromBody] dynamic objData)
-        
-{
+
+        {
             int result = 0;
             using (var scope = SQLExt.CreateTransScope())
             {
@@ -516,49 +611,49 @@ namespace SuperMarketApi.Controllers
                     dynamic DetailArray = itemDetail.ToList();
                     for (int i = 0; i < itemArray.Count; i++)
                     {
-                            string action = itemArray[i].Action;
-                            int ordItemId = itemArray[i].OrderItemId;
+                        string action = itemArray[i].Action;
+                        int ordItemId = itemArray[i].OrderItemId;
                         int productId = itemArray[i].ProductId;
                         double dispatchQty = itemArray[i].DispatchQty;
                         int? batchNum = itemArray[i].BatchNum;
                         int? storageId = itemArray[i].StorageStoreId;
                         int? billId = bill.BillId;
                         switch (action)
-                            {
-                                case "Add":
-                                    var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(objData);
-                                    SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
-                                    sqlCon.Open();
-                                    SqlCommand cmd = new SqlCommand("dbo.AddOrdItems", sqlCon);
-                                    cmd.CommandType = CommandType.StoredProcedure;
-                                    cmd.Parameters.Add(new SqlParameter("@orderJson", jsonString));
-                                    cmd.Parameters.Add(new SqlParameter("@companyid", companyId));
-                                    cmd.Parameters.Add(new SqlParameter("@orderId", orderId));
-                                    cmd.Parameters.Add(new SqlParameter("@ordItemId", ordItemId));
-                                    cmd.Parameters.Add(new SqlParameter("@billId", bill.BillId));
+                        {
+                            case "Add":
+                                var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(objData);
+                                SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
+                                sqlCon.Open();
+                                SqlCommand cmd = new SqlCommand("dbo.AddOrdItems", sqlCon);
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.Add(new SqlParameter("@orderJson", jsonString));
+                                cmd.Parameters.Add(new SqlParameter("@companyid", companyId));
+                                cmd.Parameters.Add(new SqlParameter("@orderId", orderId));
+                                cmd.Parameters.Add(new SqlParameter("@ordItemId", ordItemId));
+                                cmd.Parameters.Add(new SqlParameter("@billId", bill.BillId));
                                 DataSet ds = new DataSet();
-                                    SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
-                                    sqlAdp.Fill(ds);
+                                SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
+                                sqlAdp.Fill(ds);
                                 break;
-                                case "Chk":
-                                    var jsonString1 = Newtonsoft.Json.JsonConvert.SerializeObject(objData);
-                                    SqlConnection sqlCon1 = new SqlConnection(Configuration.GetConnectionString("myconn"));
-                                    sqlCon1.Open();
-                                    SqlCommand comd = new SqlCommand("dbo.UpdateInternal", sqlCon1);
-                                    comd.CommandType = CommandType.StoredProcedure;
-                                    comd.Parameters.Add(new SqlParameter("@orderData", jsonString1));
-                                    comd.Parameters.Add(new SqlParameter("@companyid", companyId));
-                                    comd.Parameters.Add(new SqlParameter("@orderId", orderId));
-                                    comd.Parameters.Add(new SqlParameter("@ordItemId", ordItemId));
-                                    comd.Parameters.Add(new SqlParameter("@OrdDetailId", OrdDetailId));
+                            case "Chk":
+                                var jsonString1 = Newtonsoft.Json.JsonConvert.SerializeObject(objData);
+                                SqlConnection sqlCon1 = new SqlConnection(Configuration.GetConnectionString("myconn"));
+                                sqlCon1.Open();
+                                SqlCommand comd = new SqlCommand("dbo.UpdateInternal", sqlCon1);
+                                comd.CommandType = CommandType.StoredProcedure;
+                                comd.Parameters.Add(new SqlParameter("@orderData", jsonString1));
+                                comd.Parameters.Add(new SqlParameter("@companyid", companyId));
+                                comd.Parameters.Add(new SqlParameter("@orderId", orderId));
+                                comd.Parameters.Add(new SqlParameter("@ordItemId", ordItemId));
+                                comd.Parameters.Add(new SqlParameter("@OrdDetailId", OrdDetailId));
                                 //comd.Parameters.Add(new SqlParameter("@billId", billId));
                                 DataSet ds1 = new DataSet();
-                                    SqlDataAdapter sqlAdp1 = new SqlDataAdapter(comd);
-                                    sqlAdp1.Fill(ds1);
+                                SqlDataAdapter sqlAdp1 = new SqlDataAdapter(comd);
+                                sqlAdp1.Fill(ds1);
                                 break;
 
-                            }
                         }
+                    }
                     //}
                     scope.Complete();
                     var response = new
@@ -577,14 +672,14 @@ namespace SuperMarketApi.Controllers
                         msg = "Something went wrong",
                         error = new Exception(ex.Message, ex.InnerException)
                     };
-                    
+
                     return Ok(response);
                 }
             }
         }
 
 
-            [HttpPost("Dispatch")]
+        [HttpPost("Dispatch")]
         public ActionResult Dispatch([FromBody] dynamic objData)
         {
             int result = 0;
@@ -598,7 +693,7 @@ namespace SuperMarketApi.Controllers
                     Bill bill = new Bill();
                     bill = objData.ToObject<Bill>();
                     bill.BillType = (int)BillTypeEnum.Internal;
-                   bill.ReceiveStatus = (int)BillReceiveStatus.Open;
+                    bill.ReceiveStatus = (int)BillReceiveStatus.Open;
                     bill.CompanyId = companyId;
                     db.Bill.Add(bill);
 
@@ -754,9 +849,9 @@ namespace SuperMarketApi.Controllers
 
                         }
 
-                    //    if (orderProd.OrderId != null)
-                    //        OrdersControllerExt.DispatchComplete(db, (int)orderProd.OrderId, (int)OrderType.Internal);
-                   }
+                        //    if (orderProd.OrderId != null)
+                        //        OrdersControllerExt.DispatchComplete(db, (int)orderProd.OrderId, (int)OrderType.Internal);
+                    }
                     //bill.ReceiveStatus = (int)BillReceiveStatus.Open;
 
                     db.SaveChanges();
@@ -765,7 +860,7 @@ namespace SuperMarketApi.Controllers
                     {
                         status = 200,
                         billId = bill.BillId,
-                        data ="Dispatched Successfully"
+                        data = "Dispatched Successfully"
                     };
                     return Ok(response);
                 }
@@ -784,10 +879,10 @@ namespace SuperMarketApi.Controllers
         }
         [HttpPost("ReceiveDispatch")]
         public ActionResult ReceiveDispatch([FromBody] dynamic objData)
-        
+
         {
-                try
-                {
+            try
+            {
                 int companyId = objData[0].companyId;
                 int billId = objData[0].billId;
                 var bill = db.Bill.Where(s => s.BillId == billId).Select(b => new
@@ -805,7 +900,7 @@ namespace SuperMarketApi.Controllers
                     b.DispatchType,
                     //b.OrderId,
                     b.DispatchById
-                  
+
                 }).FirstOrDefault();
                 var ordItemDetails = db.OrderItemDetails.Where(op => op.BillId == billId && op.OrderItemType == (int)SuperMarketApi.Models.Enum.OrderItemType.Dispatch && op.CompanyId == companyId).Include(o => o.OrderItem).ToList();
                 var storageStrList = new List<StorageStrList>();
@@ -814,7 +909,7 @@ namespace SuperMarketApi.Controllers
                 foreach (OrderItemDetail ordItemDetail in ordItemDetails)
                 {
 
-                    var receiveProducts = db.Products.Where(p => (p.Id == ordItemDetail.ActualProdId  && p.CompanyId == companyId)
+                    var receiveProducts = db.Products.Where(p => (p.Id == ordItemDetail.ActualProdId && p.CompanyId == companyId)
                                                   ).Select(p => new { p.Id, p.Description });
 
                     foreach (var receiveProduct in receiveProducts)
@@ -826,7 +921,7 @@ namespace SuperMarketApi.Controllers
                         product.OrderProductId = ordItemDetail.OrderItemId;
                         receiveProductList.Add(product);
                     }
-                    var receiver = db.Stocks.Where(s =>  s.ProductId == ordItemDetail.ActualProdId && s.StorageStoreId != null && s.CompanyId == companyId).FirstOrDefault();
+                    var receiver = db.Stocks.Where(s => s.ProductId == ordItemDetail.ActualProdId && s.StorageStoreId != null && s.CompanyId == companyId).FirstOrDefault();
                     if (receiver != null)
                     {
                         //ordItemDetail.ReceiveStorageName = receiver.StorageStore.Name;
@@ -846,7 +941,7 @@ namespace SuperMarketApi.Controllers
                     }
 
                     if (ordItemDetail.ContatinerId != null)
-                        ordItemDetail.GrossQuantity = ordItemDetail.Quantity ;
+                        ordItemDetail.GrossQuantity = ordItemDetail.Quantity;
                 }
 
                 orderProductDetList = ordItemDetails.Select(op => new
@@ -866,7 +961,7 @@ namespace SuperMarketApi.Controllers
                     op.Tax2,
                     op.Id,
                     op.BillId,
-                    
+
 
                 });
                 var OrdItem = from b in db.OrderItemDetails
@@ -1110,7 +1205,7 @@ namespace SuperMarketApi.Controllers
                         msg = "Something went wrong",
                         error = new Exception(ex.Message, ex.InnerException)
                     };
-                            return Ok(response);
+                    return Ok(response);
                 }
             }
         }
@@ -1215,7 +1310,7 @@ namespace SuperMarketApi.Controllers
                             ordItemDetail.OrderItemId = orderProdId;
                             ordItemDetail.CompanyId = companyId;
                             db.OrderItemDetails.Add(ordItemDetail);
-                              db.SaveChanges();
+                            db.SaveChanges();
                             //SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
                             //sqlCon.Open();
                             //SqlCommand cmd = new SqlCommand("dbo.UpdateStock", sqlCon);
@@ -1249,7 +1344,7 @@ namespace SuperMarketApi.Controllers
                             db.OrderItems.Add(orderProd);
                             db.SaveChanges();
 
-                            OrderItemDetail ordProdDetail = new OrderItemDetail(orderProd.Id, bill.BillId, (int)Models.Enum.OrderItemType.Receive, qty, 0, 0, 0, 0, (DateTime)bill.ReceivedDate,db);
+                            OrderItemDetail ordProdDetail = new OrderItemDetail(orderProd.Id, bill.BillId, (int)Models.Enum.OrderItemType.Receive, qty, 0, 0, 0, 0, (DateTime)bill.ReceivedDate, db);
                             ordProdDetail.ActualProdId = prodId;
                             ordProdDetail.StorageStoreId = (int)storageStoreId;
                             ordProdDetail.OrderItemType = (int)Models.Enum.OrderItemType.Receive;
@@ -1347,14 +1442,14 @@ namespace SuperMarketApi.Controllers
                     //    bill.ReceiveStatus = (int)BillReceiveStatus.Closed;
                     //else
                     //    bill.ReceiveStatus = (int)BillReceiveStatus.Partial;
-                       bill.ReceiveStatus = (int)BillReceiveStatus.Closed;
+                    bill.ReceiveStatus = (int)BillReceiveStatus.Closed;
 
                     db.Entry(bill).State = EntityState.Modified;
-                        db.SaveChanges();
-                        scope.Complete();
-                        var error = new { data = "", msg = "Data Received Successfully" };
-                        return Json(error);
-                    }
+                    db.SaveChanges();
+                    scope.Complete();
+                    var error = new { data = "", msg = "Data Received Successfully" };
+                    return Json(error);
+                }
                 catch (Exception e)
                 {
                     var error = new Exception(e.Message, e.InnerException);
@@ -1425,7 +1520,7 @@ namespace SuperMarketApi.Controllers
                             db.OrderItems.Add(orderItem);
                             db.SaveChanges();
                         }
-                }
+                    }
                     db.SaveChanges();
                     scope.Complete();
                     var response = new
@@ -1556,15 +1651,15 @@ namespace SuperMarketApi.Controllers
                               };
 
                 var data = new
-                    {
-                        bill = bill,
-                        receiveProductList = receiveProductList,
-                        orderProductDetList = orderProductDetList,
-                        storageStrList = storageStrList,
+                {
+                    bill = bill,
+                    receiveProductList = receiveProductList,
+                    orderProductDetList = orderProductDetList,
+                    storageStrList = storageStrList,
                     OrderItem = OrdItem
                 };
-                    return Json(data);
-                
+                return Json(data);
+
             }
             catch (Exception e)
             {
@@ -1760,23 +1855,23 @@ namespace SuperMarketApi.Controllers
                             //if (orderProd.DispatchedQuantity == null)
                             //{
                             //    db.Entry(orderProd).State = EntityState.Deleted;
-                                //db.Entry(ordItemDetail).State = EntityState.Deleted;
+                            //db.Entry(ordItemDetail).State = EntityState.Deleted;
                             //}
                             //else
-                          // {
-                                db.Entry(orderProd).State = EntityState.Modified;
-                                //db.SaveChanges();
-                                OrderItemDetail ordItemDetail = db.OrderItemDetails.Find(ordItemDetailId);
-                                //ordItemDetail.Quantity = 0;
-                                //ordItemDetail.StorageStoreId = (int)storageStoreId;
-                                //ordItemDetail.Quantity = qty;
-                                //ordItemDetail.OrderItemId = orderProdId;
-                                //ordItemDetail.ActualProdId = prodId;
-                                
+                            // {
+                            db.Entry(orderProd).State = EntityState.Modified;
+                            //db.SaveChanges();
+                            OrderItemDetail ordItemDetail = db.OrderItemDetails.Find(ordItemDetailId);
+                            //ordItemDetail.Quantity = 0;
+                            //ordItemDetail.StorageStoreId = (int)storageStoreId;
+                            //ordItemDetail.Quantity = qty;
+                            //ordItemDetail.OrderItemId = orderProdId;
+                            //ordItemDetail.ActualProdId = prodId;
+
                             db.Entry(ordItemDetail).State = EntityState.Modified;
-                                //if (ordItemDetail.Quantity < CalcDispatchQty(db, billId, orderProdId))
-                                //    isClose = false;
-                           // }
+                            //if (ordItemDetail.Quantity < CalcDispatchQty(db, billId, orderProdId))
+                            //    isClose = false;
+                            // }
 
                             //if (orderProd.OrderId != null)
                             //    OrderComplete(db, (int)orderProd.OrderId, (int)OrderType.Internal, companyId);
@@ -1932,7 +2027,7 @@ namespace SuperMarketApi.Controllers
         }
 
 
-        public void WastageQtyAlert(int companyId,int ordPdtDetId, int productId, int? storeId, string type)
+        public void WastageQtyAlert(int companyId, int ordPdtDetId, int productId, int? storeId, string type)
         {
             SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
             sqlCon.Open();
@@ -2088,7 +2183,7 @@ namespace SuperMarketApi.Controllers
                 return View();
             }
         }
-          [HttpPost("GetOrderItems")]
+        [HttpPost("GetOrderItems")]
 
         public IActionResult GetOrderItems([FromBody] JObject objData)
         {
@@ -2184,36 +2279,50 @@ namespace SuperMarketApi.Controllers
                     op.Id
                 });
 
-           var  orderProds = from op in db.OrderItems
+                var orderProds = from op in db.OrderItems
                                  join o in db.Orders on op.OrderId equals o.Id
                                  join p in db.Products on op.ProductId equals p.Id
                                  join oid in db.OrderItemDetails on op.Id equals oid.OrderItemId
                                  where (o.SuppliedById == supplierId) &&
                                   op.Status < (int)OrderProductStatus.Closed &&
                                  (o.OrderedById == orderedById && (o.CompanyId == companyId))
-                select new
-                {
-                    op.ProductId,
-                    op.Product.Description,op.CompanyId, op.ContainerId,
-                    op.Container,op.ContainerCount,op.ContainerWeight,
-                    op.DispatchStorageId,op.DispatchStorageName, op.OrderId,
-                    op.PendingQty,  op.Price,
-                    op.Amount,op.Quantity,op.Tax1,
-                    op.Tax2, op.TaxAmount, oid.Id,
-                    oid.OrderItemRefId,op.RefId,oid.OrderItemType,oid.OrderItemId
-                };
+                                 select new
+                                 {
+                                     op.ProductId,
+                                     op.Product.Description,
+                                     op.CompanyId,
+                                     op.ContainerId,
+                                     op.Container,
+                                     op.ContainerCount,
+                                     op.ContainerWeight,
+                                     op.DispatchStorageId,
+                                     op.DispatchStorageName,
+                                     op.OrderId,
+                                     op.PendingQty,
+                                     op.Price,
+                                     op.Amount,
+                                     op.Quantity,
+                                     op.Tax1,
+                                     op.Tax2,
+                                     op.TaxAmount,
+                                     oid.Id,
+                                     oid.OrderItemRefId,
+                                     op.RefId,
+                                     oid.OrderItemType,
+                                     oid.OrderItemId
+                                 };
 
                 var data = new
                 {
                     count = count,
                     dispatchProductList = dispatchProductList,
                     orderProducts = orderProductList,
-                    storageStrList= storageStrList,
+                    storageStrList = storageStrList,
                     orderProd = orderProds
                 };
                 return Json(data);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 var error = new { data = e.Message, msg = "Contact your service provider" };
                 return Json(error);
@@ -2240,7 +2349,7 @@ namespace SuperMarketApi.Controllers
                                  where o.SuppliedById == vendorId &&
                                   op.Status < (int)OrderProductStatus.Closed &&
                                  o.OrderedById == storeId && o.CompanyId == companyId
-                                 select op).Include(x =>x.Product).ToList();
+                                 select op).Include(x => x.Product).ToList();
             }
             for (int i = 0; i < orderProducts.Count(); i++)
             {
@@ -2273,3 +2382,5 @@ namespace SuperMarketApi.Controllers
         }
     }
 }
+
+

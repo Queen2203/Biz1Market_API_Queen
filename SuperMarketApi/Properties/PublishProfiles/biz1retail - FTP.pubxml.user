@@ -6,8 +6,6 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAZIZQa+UBaUaL6HUwhLjaCQAAAAACAAAAAAAQZgAAAAEAACAAAABUeIx/dT/dHtfXnCkT4CGQXzRN5aVEZDNgqiraHJl+dQAAAAAOgAAAAAIAACAAAADE6xlxpneW9yuVavBgrfwKHk1D1TnfAgVbLpXuEXW8NYAAAACcZ0AtCL3MfsCA3EspMnI5/pCwB46loLRa3ENDE37SNKT2ltYzyFm0dyi9YwyqhoIv+JbmcQfzXhRblkprXaNDEJSQtkpKF6e16gfDQdrstnBMbv10iB7Xt2gzcbd370KYtSWZDxegzNTCOrB6KFaBxgOfyQjrp1Gu5zJZII9f+EAAAACCd15BbHSasMhvG5mWvEM4DQNtYJiPMicPYXla1VPCmgcP2qIwEI7bZYeEBru+LD3NIMHqC6Fdum8VfqJCF5+Q</EncryptedPassword>
-    <_PublishTargetUrl>ftp://waws-prod-ma1-009.ftp.azurewebsites.windows.net/site/wwwroot</_PublishTargetUrl>
-    <History>False|2021-12-27T07:26:09.3482408Z;</History>
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAOtl7am6vC0CFtAIaA3hF8wAAAAACAAAAAAAQZgAAAAEAACAAAABTMWzmy9k3EhSzI4fMeVPv+x0wqfgsDhG6JZuoVHxF5AAAAAAOgAAAAAIAACAAAAA/NdWSwDKJY+cjfE0ihEf6cIchaQ17L53OqAtqsp1I04AAAAC41OcXLe+Q0773o4DP/h1cJ9BaYBvyeqBmLmu/GpYD4M04gN82xrOanJjwvm17P0nIgy3Wn2ZznmQ1Ho40M7/X0lIzInG1CxQvpu+TcSmR4xHwLFQHCoDHoqsWk1weyoaM6ID9wf2GCD1Cdu9b1HS4C7JqUvulMWPQXT/qhAxD/0AAAAB1+amB0DaaYMWqFaG+T5/oJ4Ac/+GL7nPGIJx0zOsbOwGkyBoZdcK5gqX4lsrEC2U7gBkbEKngU9S2vxlNkuVu</EncryptedPassword>
   </PropertyGroup>
 </Project>
