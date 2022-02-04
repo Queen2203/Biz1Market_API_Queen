@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SuperMarketApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,11 +25,108 @@ namespace SuperMarketApi.Controllers
             Configuration = configuration;
         }
 
+
+        [HttpGet("GetIndex")]
+        public IActionResult GetIndex(int CompanyId)
+        {
+            try
+            {
+                SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
+                sqlCon.Open();
+                SqlCommand cmd = new SqlCommand("dbo.Customer", sqlCon);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CompId", CompanyId));
+                DataSet ds = new DataSet();
+                SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
+                sqlAdp.Fill(ds);
+                DataTable table = ds.Tables[0];
+
+                var data = new
+                {
+                    Order = ds.Tables[0]
+                };
+                sqlCon.Close();
+                return Ok(table);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+        }
+
+        [HttpPost("Update")]
+        public IActionResult Update([FromBody] JObject data)
+        {
+            try
+            {
+                dynamic cust = data;
+                Customer customer = cust.ToObject<Customer>();
+                customer.CreatedDate = db.Customers.Where(x => x.Id == customer.Id).AsNoTracking().FirstOrDefault().CreatedDate;
+                customer.ModifiedDate = DateTime.Now;
+                db.Entry(customer).State = EntityState.Modified;
+                db.SaveChanges();
+                var error = new
+                {
+                    status = 200,
+                    msg = "The Customer updated successfully"
+                };
+
+                return Json(error);
+            }
+            catch (Exception e)
+            {
+                var st = e.ToString();
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+        }
+
+
+
+
+        [HttpGet("Delete")]
+        [EnableCors("AllowOrigin")]
+        public IActionResult Delete(int Id)
+        {
+            var orders = db.Orders.Where(x => x.CustomerId == Id).ToList();
+            if (orders.Count == 0)
+            {
+                var cust = db.Customers.Find(Id);
+                db.Customers.Remove(cust);
+                db.SaveChanges();
+                var error = new
+                {
+                    status = 200,
+                    msg = "The Customer deleted successfully"
+                };
+                return Json(error);
+            }
+            else
+            {
+                var error = new
+                {
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+        }
         // View Customer Detail
         [HttpGet("GetCustomerList")]
         public IActionResult GetCustomerList(int CompanyId)
         {
-            return Json(db.Customers.Where(x => x.CompanyId == CompanyId).ToList());          
+            return Json(db.Customers.Where(x => x.CompanyId == CompanyId).ToList());
         }
 
 
