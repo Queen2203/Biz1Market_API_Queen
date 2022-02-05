@@ -44,11 +44,14 @@ namespace SuperMarketApi.Controllers
         {
             try
             {
+
+
                 List<Category> categories;
-                if(type == "A") categories = db.Categories.Where(x => x.CompanyId == companyid).Include(x => x.ParentCategory).ToList();
-                else if(type == "P") categories = db.Categories.Where(x => x.CompanyId == companyid && x.ParentCategoryId == null).Include(x => x.ParentCategory).ToList();
+                if (type == "A") categories = db.Categories.Where(x => x.CompanyId == companyid).Include(x => x.ParentCategory).ToList();
+                else if (type == "P") categories = db.Categories.Where(x => x.CompanyId == companyid && x.ParentCategoryId == null).Include(x => x.ParentCategory).ToList();
                 else categories = db.Categories.Where(x => x.CompanyId == companyid && x.ParentCategoryId != null).Include(x => x.ParentCategory).ToList();
                 return Ok(categories);
+
             }
             catch (Exception ex)
             {
@@ -63,13 +66,13 @@ namespace SuperMarketApi.Controllers
         }
 
         [HttpPost("addcategory")]
-        public IActionResult addcategory([FromBody]Category category)
+        public IActionResult addcategory([FromBody] Category category)
         {
             try
             {
                 db.Categories.Add(category);
                 db.SaveChanges();
-                foreach(int id in category.variantgroupids)
+                foreach (int id in category.variantgroupids)
                 {
                     CategoryVariantGroup categoryVariantGroup = new CategoryVariantGroup();
                     categoryVariantGroup.CategoryId = category.Id;
@@ -105,7 +108,7 @@ namespace SuperMarketApi.Controllers
                 db.Entry(category).State = EntityState.Modified;
                 db.SaveChanges();
                 var vargroupids = db.CategoryVariantGroups.Where(x => x.CategoryId == category.Id).Select(x => x.VariantGroupId).ToList();
-                foreach(int id in category.variantgroupids)
+                foreach (int id in category.variantgroupids)
                 {
                     if (!vargroupids.Contains(id))
                     {
@@ -116,7 +119,7 @@ namespace SuperMarketApi.Controllers
                         db.SaveChanges();
                     }
                 }
-                foreach(int id in vargroupids)
+                foreach (int id in vargroupids)
                 {
                     if (!category.variantgroupids.Contains(id))
                     {
@@ -143,6 +146,62 @@ namespace SuperMarketApi.Controllers
                 };
                 return Ok(response);
             }
+        }
+
+        [HttpGet("Index")]
+        public IActionResult Index(int companyid)
+        {
+            try
+            {
+                var Category = db.Categories.Where(x => x.CompanyId == companyid).ToList();
+                return Ok(Category);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+        }
+
+        [HttpGet("UpdatecategoryAct")]
+        public IActionResult UpdateAct(int Id, bool active, int CompanyId)
+        {
+            try
+            {
+                var Category = db.Categories.Find(Id);
+                Category.isactive = active;
+                Category.CompanyId = CompanyId;
+                Category.ModifiedDate = DateTime.Now;
+                db.Entry(Category).State = EntityState.Modified;
+                db.SaveChanges();
+                var error = new
+                {
+                    status = "success",
+                    data = new
+                    {
+                        value = 2
+                    },
+                    msg = "The data updated successfully"
+                };
+
+                return Json(error);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    error = new Exception(e.Message, e.InnerException),
+                    status = 0,
+                    msg = "Something went wrong  Contact our service provider"
+                };
+                return Json(error);
+            }
+
         }
         [HttpGet("getcategorybyid")]
         public IActionResult getcategorybyid(int CategoryId)

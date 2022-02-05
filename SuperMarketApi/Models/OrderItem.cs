@@ -25,9 +25,9 @@ namespace SuperMarketApi.Models
         //public int? KitchenUserId { get; set; }
         //public virtual User KitchenUser { get; set; }
 
-        [ForeignKey("KOT")]
-        public int? KOTId { get; set; }
-        public virtual KOT KOT { get; set; }
+        //[ForeignKey("KOT")]
+        //public int? KOTId { get; set; }
+        //public virtual KOT KOT { get; set; }
 
         public string Note { get; set; }
         public string Message { get; set; }

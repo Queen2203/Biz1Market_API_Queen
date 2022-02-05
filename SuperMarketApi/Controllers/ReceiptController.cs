@@ -31,13 +31,12 @@ namespace SuperMarketApi.Controllers
                 SqlConnection sqlCon = new SqlConnection(Configuration.GetConnectionString("myconn"));
                 sqlCon.Open();
 
-                SqlCommand cmd = new SqlCommand("dbo.testdata", sqlCon);
+                SqlCommand cmd = new SqlCommand("dbo.Receipt", sqlCon);
                 cmd.CommandType = CommandType.StoredProcedure;
                 //cmd.Parameters.Add(new SqlParameter("@ordereddate", Orderedate));
                 cmd.Parameters.Add(new SqlParameter("@storeId", Storeid));
                 cmd.Parameters.Add(new SqlParameter("@fromDate", fromdate));
                 cmd.Parameters.Add(new SqlParameter("@todate", todate));
-
                 DataSet ds = new DataSet();
                 SqlDataAdapter sqlAdp = new SqlDataAdapter(cmd);
                 sqlAdp.Fill(ds);
@@ -58,7 +57,32 @@ namespace SuperMarketApi.Controllers
                 };
                 return Json(error);
             }
-        
+
+        }
+
+        [HttpGet("getByOrderId")]
+        public ActionResult getByOrderId(int OrderId)
+        {
+            try
+            {
+                List<Transaction> transactions = db.Transactions.Where(x => x.OrderId == OrderId).ToList();
+                var response = new
+                {
+                    status = 200,
+                    msg = "Success",
+                    transactions = transactions
+                };
+                return Json(response);
+            }
+            catch (Exception e)
+            {
+                var error = new
+                {
+                    status = 500,
+                    error = new Exception(e.Message, e.InnerException)
+                };
+                return Json(error);
+            }
         }
         // GET: ReceiptController
         public ActionResult Index()

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SuperMarketApi.Models;
 
 namespace SuperMarketApi.Migrations
 {
     [DbContext(typeof(POSDbContext))]
-    partial class POSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220202061425_222022master")]
+    partial class _222022master
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1076,6 +1078,45 @@ namespace SuperMarketApi.Migrations
                     b.ToTable("EnumVal");
                 });
 
+            modelBuilder.Entity("SuperMarketApi.Models.KOT", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CompanyId");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Instruction");
+
+                    b.Property<int?>("KOTGroupId");
+
+                    b.Property<string>("KOTNo");
+
+                    b.Property<int>("KOTStatusId");
+
+                    b.Property<DateTime>("ModifiedDate");
+
+                    b.Property<int>("OrderId");
+
+                    b.Property<int?>("StoreId");
+
+                    b.Property<bool>("Updated");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("KOTGroupId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("KOT");
+                });
+
             modelBuilder.Entity("SuperMarketApi.Models.KOTGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -1756,6 +1797,8 @@ namespace SuperMarketApi.Migrations
 
                     b.Property<double?>("ItemDiscount");
 
+                    b.Property<int?>("KOTId");
+
                     b.Property<string>("Message");
 
                     b.Property<string>("Note");
@@ -1827,6 +1870,8 @@ namespace SuperMarketApi.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("KOTId");
 
                     b.HasIndex("OrderId");
 
@@ -4253,6 +4298,27 @@ namespace SuperMarketApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("SuperMarketApi.Models.KOT", b =>
+                {
+                    b.HasOne("SuperMarketApi.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SuperMarketApi.Models.KOTGroup", "KOTGroup")
+                        .WithMany()
+                        .HasForeignKey("KOTGroupId");
+
+                    b.HasOne("SuperMarketApi.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SuperMarketApi.Models.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId");
+                });
+
             modelBuilder.Entity("SuperMarketApi.Models.KOTGroup", b =>
                 {
                     b.HasOne("SuperMarketApi.Models.Company", "Company")
@@ -4528,6 +4594,10 @@ namespace SuperMarketApi.Migrations
                     b.HasOne("SuperMarketApi.Models.Contact", "User")
                         .WithMany()
                         .HasForeignKey("CreatedBy");
+
+                    b.HasOne("SuperMarketApi.Models.KOT", "KOT")
+                        .WithMany()
+                        .HasForeignKey("KOTId");
 
                     b.HasOne("SuperMarketApi.Models.Order", "Order")
                         .WithMany()

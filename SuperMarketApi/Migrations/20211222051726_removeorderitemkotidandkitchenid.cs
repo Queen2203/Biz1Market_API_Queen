@@ -67,20 +67,17 @@ namespace SuperMarketApi.Migrations
                         name: "FK_OrderCharges_AdditionalCharges_AdditionalChargeId",
                         column: x => x.AdditionalChargeId,
                         principalTable: "AdditionalCharges",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrderCharges_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrderCharges_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrderCharges_Stores_StoreId",
                         column: x => x.StoreId,
@@ -107,14 +104,12 @@ namespace SuperMarketApi.Migrations
                         name: "FK_OrdItemOptions_Options_OptionId",
                         column: x => x.OptionId,
                         principalTable: "Options",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrdItemOptions_OrderItems_OrderItemId",
                         column: x => x.OrderItemId,
                         principalTable: "OrderItems",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -194,8 +189,7 @@ namespace SuperMarketApi.Migrations
                         name: "FK_KOT_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_KOT_KOTGroups_KOTGroupId",
                         column: x => x.KOTGroupId,
@@ -206,8 +200,7 @@ namespace SuperMarketApi.Migrations
                         name: "FK_KOT_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_KOT_Stores_StoreId",
                         column: x => x.StoreId,
